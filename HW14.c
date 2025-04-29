@@ -2,74 +2,87 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define TITLE_SIZE 100
+#define AUTHOR_SIZE 100
+#define FILENAME "HW14Data.txt"
+#define BINARY_FILENAME "books.bin"
+#define FLUSH while(getchar() != '\n');
 
 typedef struct Book {
-    char title[50];
-    char author[50];
+    char title[TITLE_SIZE];
+    char author[AUTHOR_SIZE];
     int year;
+    struct Book * next;
 } Book;
 
-typedef struct Node {
-    Book book;
-    struct Node *next;
-    struct Node *prev;
-} Node;
-// Linked Array functions
-void InsertNode_End(Node ** root, Book * book);
-void DeleteNode(Node ** target);
-void Display(Node ** root);
-void createLinkedList(Node ** root);
+void AppendNodeFromFile(Book ** root);
+void DeleteNode(Book ** target);
+void Display(Book ** root);
+void InitializeList(Book ** root);
 
-// Book Functions
-char * getBookTitle(Book);
-void setBoookTitle(Book, char[50]);
-char * getBookAuthor(Book);
-void setBookAuthor(Book, char[50]);
-int getBookYear(Book);
-void setBookYear(Book, int);
+int main(void) { 
+	
+    Book* root;
 
-int main(void) {
-    Node* root = NULL;
-
-    FILE * pfile;
-    char currChar;
-    if ((pfile = fopen("HW14Data.txt", "r")) != NULL) {
-        printf("File opened\n");
-    } else {
-        printf("File Failed to open.\n");
-    }
     return 0;
 }
 
-void insertNode_end(Node ** root, Book * book) {
-    Node * newNode = (Node * ) malloc(sizeof(Node)); // Creating a new node that we are going to use
-    if (newNode == NULL) {
-        printf("Memory Allocation for Node Failed.\n");
-        exit(1);
-    }
-
-    // assigning values to it
-    newNode->next = NULL;
-    newNode->book = *book;
-
-    // checking for "root" node to point to NULL
-    // if it does, make it point to the "newNode"
-    if (*root == NULL) {
-        *root = newNode;
-        return; // work done
-    }
-
-    Node * curr = *root;
-    // Looking for the last item to place newNode
-    // in case "root" != NULL
-    while (curr->next != NULL) {
-        curr = curr->next;
-    }
-    curr->next = newNode; // after found, will give the value to the last value in the list
-    free(newNode);
+void InitializeList(Book ** Root){
+//    FreeList(Root);
+    Root = NULL;
 }
-void createLinkedList(Node root) {}
 
+void AppendNodeFromFile(Book ** book) {
+    
+    char title[TITLE_SIZE];
+    char author[AUTHOR_SIZE];
+    char yearStr[10];
 
+    // Opening file
+    FILE * fp = fopen(FILENAME, "r");
+    if (!fp) {
+        printf("Error opening file %s", FILENAME);
+        return;
+    }
+        
+    // Gathering information form file
+    while(fgets(title, TITLE_SIZE, fp)) {
+        fgets(author, AUTHOR_SIZE, fp);
+	fgets(yearStr, 10, fp);
 
+	// Removing newLine Characters
+	title[strcspn(title, "\n")] = '\0';
+	author[strcspn(author, "\n")] = '\0';
+	yearStr[strcspn(yearStr, "\n")] = '\0';
 
+        // Creaing new instance
+        Book* newBook = (Book*) malloc(sizeof(Book));
+	if (!newBook) {
+	    printf("Memory allocation failed");	
+	    fclose(fp);
+	    return;
+	}
+        // transfering information to Book
+	strcpy(newBook->title, title);
+	strcpy(newBook->author, author);
+
+	//https://www.geeksforgeeks.org/convert-string-to-int-in-c/#
+	newBook->year = atoi(yearStr); 
+	newBook->next = NULL;
+
+	if (head == NULL) {
+	    head = newBook;
+	} else {
+	    Book * temp = head;
+	    while ( temp->next != NULL )
+                temp = temp->next;
+	    temp->next = newBook;
+	}
+    }
+
+    fclose(fp);
+    printf("Books loaded from file: %s", FILENAME);
+    return;
+}
